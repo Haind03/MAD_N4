@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Modal, Tex
 import { useRouter } from 'expo-router';
 import { usePetStore } from '@/store/pet-store';
 import Colors from '@/constants/colors';
-import { Plus, ChevronDown, Search, X } from 'lucide-react-native';
+import { Plus, ChevronDown, Search, X, Pencil } from 'lucide-react-native';
 
 export default function PetSelector() {
   const router = useRouter();
-  const { pets, activePetId, setActivePet } = usePetStore();
+  const { pets, activePetId, setActivePet, deletePet } = usePetStore();
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -16,12 +16,22 @@ export default function PetSelector() {
     setDropdownVisible(false);
   };
 
+  const handleDeletePet = (petId: string) => {
+    deletePet(petId);
+  };
+
+  // Hàm chuyển đến màn hình sửa thú cưng. Giả sử route '/edit-pet' nhận petId qua query.
+  const handleUpdatePet = (petId: string) => {
+    router.push(`/edit-pet?petId=${petId}`);
+    setDropdownVisible(false);
+  };
+
   const handleSelectPet = (petId: string) => {
     setActivePet(petId);
     setDropdownVisible(false);
   };
 
-  const filteredPets = searchQuery 
+  const filteredPets = searchQuery
     ? pets.filter(pet => pet.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : pets;
 
@@ -104,19 +114,33 @@ export default function PetSelector() {
               data={filteredPets}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <TouchableOpacity 
-                  style={[
-                    styles.petItem,
-                    item.id === activePetId && styles.activePetItem
-                  ]}
-                  onPress={() => handleSelectPet(item.id)}
-                >
-                  <Image source={{ uri: item.imageUrl }} style={styles.petImage} />
-                  <View style={styles.petInfo}>
-                    <Text style={styles.petName}>{item.name}</Text>
-                    <Text style={styles.petBreed}>{item.breed}</Text>
-                  </View>
-                </TouchableOpacity>
+                <View style={styles.itemContainer}>
+                  <TouchableOpacity 
+                    style={[
+                      styles.petItem,
+                      item.id === activePetId && styles.activePetItem
+                    ]}
+                    onPress={() => handleSelectPet(item.id)}
+                  >
+                    <Image source={{ uri: item.imageUrl }} style={styles.petImage} />
+                    <View style={styles.petInfo}>
+                      <Text style={styles.petName}>{item.name}</Text>
+                      <Text style={styles.petBreed}>{item.breed}</Text>
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.updateButton} 
+                    onPress={() => handleUpdatePet(item.id)}
+                  >
+                    <Pencil size={18} color={Colors.primary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.deleteButton} 
+                    onPress={() => handleDeletePet(item.id)}
+                  >
+                    <X size={18} color="red" />
+                  </TouchableOpacity>
+                </View>
               )}
               ListEmptyComponent={
                 <View style={styles.emptyList}>
@@ -147,6 +171,47 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
     marginBottom: 8,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  petItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    flex: 1
+  },
+  activePetItem: {
+    backgroundColor: Colors.primary + '15', // 15% opacity
+  },
+  petImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  petInfo: {
+    flex: 1,
+  },
+  petName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.text,
+  },
+  petBreed: {
+    fontSize: 12,
+    color: Colors.textLight,
+  },
+  updateButton: {
+    marginLeft: 8,
+    padding: 4,
+  },
+  deleteButton: {
+    marginLeft: 8,
+    padding: 4,
   },
   dropdownButton: {
     backgroundColor: Colors.card,
@@ -225,34 +290,6 @@ const styles = StyleSheet.create({
     height: 40,
     color: Colors.text,
     fontSize: 14,
-  },
-  petItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  activePetItem: {
-    backgroundColor: Colors.primary + '15', // 15% opacity
-  },
-  petImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-  },
-  petInfo: {
-    flex: 1,
-  },
-  petName: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: Colors.text,
-  },
-  petBreed: {
-    fontSize: 12,
-    color: Colors.textLight,
   },
   emptyList: {
     padding: 24,

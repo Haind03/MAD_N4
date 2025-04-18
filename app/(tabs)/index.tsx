@@ -136,7 +136,7 @@ export default function HomeScreen() {
               <View style={styles.additionalFeatureIcon}>
                 <Stethoscope size={20} color={Colors.primary} />
               </View>
-              <Text style={styles.additionalFeatureText}>Bệnh lý</Text>
+              <Text style={styles.additionalFeatureText}>Thư viện bệnh</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
